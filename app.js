@@ -24,6 +24,84 @@ server.listen(port, function(){
 
 var topbar = null, leftbar = null, rightbar = null, downbar = null;
 var bars = [];
+var ball = {};
+var positions = ['right', 'left', 'up', 'down'];
+var pos = null;
+
+var start_ball = function() {
+
+	ball_speed = 32;
+	ball.x = 500;
+	ball.y = 370;
+	ball.collided = false;
+
+	pos = positions[Math.floor((Math.random() * positions.length) + 0)];
+
+};
+
+var check_paddle_colision = function() {
+
+	for (var x = 0; x < bars.length; x++) {
+		if (ball.x == bars[x])
+	}
+
+};
+
+var move_ball = function() {
+
+	console.log('moving ball');
+
+	if (!ball.collided) {
+		if (pos == 'right') {
+
+			if ((ball.x + ball_speed) <= (1024-16)) {
+				ball.x = ball.x + ball_speed;
+			}
+			else {
+				pos == 'left';
+			}
+		}
+		else if (pos == 'left') {
+
+			if ((ball.x - ball_speed) >= 0) {
+				ball.x = ball.x - ball_speed;
+			}
+			else {
+				pos == 'right';
+			}
+		}
+		else if (pos == 'up') {
+
+			if ((ball.y - ball_speed) >= 0) {
+				ball.y = ball.y - ball_speed;
+			}
+			else {
+				pos = 'down';
+			}
+		}
+		else if (pos == 'down') {
+
+			if ((ball.y + ball_speed) <= (768-16)) {
+				ball.y = ball.y + ball_speed;
+			}
+			else {
+				pos = 'up';
+			}
+		}
+
+		io.sockets.emit('ball update', ball);
+
+		setTimeout(function() {
+	      move_ball();
+	    }, 100);
+	}
+};
+
+
+start_ball();
+move_ball();
+
+
 
 io.sockets.on('connection', function (socket){
 
@@ -70,6 +148,7 @@ io.sockets.on('connection', function (socket){
 
 	socket.emit('connected', {pos: pos, bars: bars});
 	io.sockets.emit('user connected', {id: socket.id, pos: pos, bar: bar});
+	socket.emit('ball position', {ball: ball})
 
 	socket.on('move', function (data){
 
@@ -78,24 +157,41 @@ io.sockets.on('connection', function (socket){
 		speed = 8;
 
 		if (data.direction == 'right') {
-			mybar.x = mybar.x + speed;
-			//mybar.velocityX = 300;
+
+			if ((mybar.x + speed) <= (1024-128)) {
+				mybar.x = mybar.x + speed;
+			}
+			
 		}
 		else if (data.direction == 'left') {
-			mybar.x = mybar.x - speed;
-			//mybar.velocityX = -300;
+
+			if ((mybar.x - speed) >= 0) {
+				mybar.x = mybar.x - speed;
+			}
+
 		}
 		else if (data.direction == 'up') {
-			mybar.y = mybar.y - speed;
-			//mybar.velocityY = -300;
+
+			if ((mybar.y - speed) >= 0) {
+				mybar.y = mybar.y - speed;
+			}
+
 		}
 		else if (data.direction == 'down') {
-			mybar.y = mybar.y + speed;
-			//mybar.velocityY = 300;
+
+			if ((mybar.y + speed) <= (768-128)) {
+				mybar.y = mybar.y + speed;
+			}
+			
 		}
 
 		io.sockets.emit('user move', mybar);
 
+
 	});
+
+	// socket.on('getBallUpdate', function (data){
+	// 	socket.emit('ball update', ball);
+	// });
 
 });

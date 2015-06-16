@@ -27,7 +27,7 @@
 		this.unique_id = unique_id;
 		game.add.existing(this);
 		game.physics.arcade.enable(this);
-		this.body.velocity.setTo(400, 400);
+		//this.body.velocity.setTo(400, 400);
 		this.body.collideWorldBounds = true;
 		this.body.bounce.setTo(1, 1);
 	}
@@ -100,6 +100,13 @@
 
 			console.log(data);
 		});
+
+		socket.on('ball update', function(data) {
+			console.log('bola data');
+			console.log(data);
+			ball.x = data.x;
+			ball.y = data.y;
+		});
 	
 	}
 
@@ -118,6 +125,9 @@
 		// var nickname = localStorage.getItem("nickname");
 		// socket.emit('new-player', {'nickname': nickname});
 	}
+
+
+	var milliseconds = 0;
 
 	function update () {
 
@@ -146,9 +156,13 @@
 			}
 
 		}
-		
 
+		// game.time.events.add(1000, function() {
+	 //        socket.emit('getBallUpdate');
+  //     	});
+		
 	}
+
 
 	function render () {
 		game.debug.text(game.time.fps || '--', 2, 14, "#00ff00");
